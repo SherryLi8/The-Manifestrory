@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Manifestory</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-color: #f8f8f8;
+      --text-color: #222;
+      --accent-color: #4a6bff;
+      --border-color: #e0e0e0;
+      --card-bg: #ffffff;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      margin: 0;
+      padding: 0;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    h1 {
+      font-weight: 600;
+      font-size: 1.8rem;
+      margin: 0;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      color: var(--text-color);
+      font-weight: 500;
+    }
+
+    .nav-links a:hover {
+      color: var(--accent-color);
+    }
+
+    .nav-links a.active {
+      color: var(--accent-color);
+      font-weight: 600;
+    }
+
+    .card {
+      background-color: var(--card-bg);
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .card-title {
+      font-weight: 600;
+      font-size: 1.1rem;
+      margin-top: 0;
+      margin-bottom: 1rem;
+      color: var(--accent-color);
+    }
+
+    .button-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    button {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 0.5rem 1rem;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    button:hover {
+      background-color: #f0f0f0;
+    }
+
+    button.active {
+      background-color: var(--accent-color);
+      color: white;
+      border-color: var(--accent-color);
+    }
+
+    textarea {
+      width: calc(100% - 2rem);
+      padding: 1rem;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-family: 'Inter', sans-serif;
+      resize: vertical;
+      min-height: 120px;
+      margin-bottom: 1rem;
+    }
+
+    .settings-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+
+    .setting {
+      margin-bottom: 0.5rem;
+    }
+
+    label {
+      display: block;
+      font-size: 0.9rem;
+      margin-bottom: 0.3rem;
+    }
+
+    input[type="range"], select, input[type="color"] {
+      width: 100%;
+    }
+
+    #canvas-container {
+      width: 100%;
+      height: 500px;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      margin-top: 2rem;
+    }
+
+    canvas {
+      display: block;
+    }
+
+    .word-count {
+      font-size: 0.8rem;
+      color: #666;
+      text-align: right;
+      margin-top: -0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    /* About page styles */
+    .about-content {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    .about-content h2 {
+      color: var(--accent-color);
+      margin-top: 2rem;
+    }
+
+    .about-content p {
+      margin-bottom: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="container" id="main-content">
+      <header>
+        <h1>The Manifestory</h1>
+        <div class="nav-links">
+          <a href="#" class="active" onclick="showPage('main')">Create</a>
+          <a href="#" onclick="showPage('about')">About</a>
+        </div>
+      </header>
+
+      <div class="card">
+        <h2 class="card-title">Content</h2>
+        <div class="button-group">
+          <button onclick="appFunctions.addManifesto('Future')">Future Manifesto</button>
+          <button onclick="appFunctions.addManifesto('Ethical')">Ethical Design</button>
+          <button onclick="appFunctions.addManifesto('Human-Centered')">Human-Centered</button>
+          <button onclick="appFunctions.addManifesto('Experimental')">Experimental</button>
+          <button onclick="appFunctions.addManifesto('Radical')">Radical</button>
+          <button onclick="appFunctions.addManifesto('Playful')">Playful</button>
+        </div>
+        
+        <textarea id="userInput" placeholder="Type your manifesto here (max 500 characters)..." rows="8"></textarea>
+        <div class="word-count"><span id="charCount">0</span>/500 characters</div>
+        <button onclick="appFunctions.addCustom()">Add Custom Manifesto</button>
+        <button onclick="appFunctions.clearAll()" style="margin-left: 0.5rem;">Clear All</button>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">Style</h2>
+        <div class="button-group" id="styleButtons">
+          <button onclick="appFunctions.setStyle('default')" class="active">Default</button>
+          <button onclick="appFunctions.setStyle('chaos')">Chaos</button>
+          <button onclick="appFunctions.setStyle('glitch')">Glitch</button>
+          <button onclick="appFunctions.setStyle('wave')">Wave</button>
+          <button onclick="appFunctions.setStyle('spiral')">Spiral</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">Settings</h2>
+        <div class="settings-grid">
+          <div class="setting">
+            <label for="fontSize">Font Size</label>
+            <input type="range" id="fontSize" min="10" max="100" value="32" oninput="appFunctions.updateSettings()">
+          </div>
+          <div class="setting">
+            <label for="fontWeight">Font Weight</label>
+            <select id="fontWeight" onchange="appFunctions.updateSettings()">
+              <option value="normal">Normal</option>
+              <option value="bold" selected>Bold</option>
+            </select>
+          </div>
+          <div class="setting">
+            <label for="fontColor">Font Color</label>
+            <input type="color" id="fontColor" value="#000000" onchange="appFunctions.updateSettings()">
+          </div>
+          <div class="setting">
+            <label for="fontFamily">Font Family</label>
+            <select id="fontFamily" onchange="appFunctions.updateSettings()">
+              <option value="sans-serif">Sans-serif</option>
+              <option value="serif">Serif</option>
+              <option value="monospace">Monospace</option>
+            </select>
+          </div>
+          <div class="setting">
+            <label for="bgColor">Background Color</label>
+            <input type="color" id="bgColor" value="#ffffff" onchange="appFunctions.updateSettings()">
+          </div>
+          <div class="setting">
+            <label for="lineHeight">Line Height</label>
+            <input type="range" id="lineHeight" min="0.8" max="3" step="0.1" value="1.5" oninput="appFunctions.updateSettings()">
+          </div>
+          <div class="setting">
+            <label for="letterSpacing">Letter Spacing</label>
+            <input type="range" id="letterSpacing" min="-2" max="10" value="0" oninput="appFunctions.updateSettings()">
+          </div>
+          <div class="setting">
+            <label for="textAlign">Text Alignment</label>
+            <select id="textAlign" onchange="appFunctions.updateSettings()">
+              <option value="left">Left</option>
+              <option value="center" selected>Center</option>
+              <option value="right">Right</option>
+              <option value="justify">Justify</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div id="canvas-container">
+        <!-- Canvas will be inserted here by p5.js -->
+      </div>
+    </div>
+
+    <div class="container" id="about-content" style="display: none;">
+      <header>
+        <h1>The Manifestory</h1>
+        <div class="nav-links">
+          <a href="#" onclick="showPage('main')">Create</a>
+          <a href="#" class="active" onclick="showPage('about')">About</a>
+        </div>
+      </header>
+
+      <div class="about-content">
+        <h2>What is The Manifestory?</h2>
+        <p>An interactive platform for creating and visualizing design manifestos with dynamic typography effects.</p>
+        
+        <h2>How to Use</h2>
+        <p>1. Add content using preset manifestos or your own text</p>
+        <p>2. Select a visual style (Default, Chaos, Glitch, Wave, or Spiral)</p>
+        <p>3. Adjust typography settings to customize appearance</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 全局应用函数接口
+    window.appFunctions = {
+      addManifesto: function(type) { 
+        console.log("Adding manifesto:", type);
+        if (window.addManifestoImpl) window.addManifestoImpl(type); 
+        else console.error("Sketch not loaded yet");
+      },
+      addCustom: function() { 
+        if (window.addCustomImpl) window.addCustomImpl(); 
+        else console.error("Sketch not loaded yet");
+      },
+      clearAll: function() { 
+        if (window.clearAllImpl) window.clearAllImpl(); 
+        else console.error("Sketch not loaded yet");
+      },
+      setStyle: function(style) { 
+        console.log("Setting style:", style);
+        if (window.setStyleImpl) window.setStyleImpl(style); 
+        else console.error("Sketch not loaded yet");
+      },
+      updateSettings: function() { 
+        if (window.updateSettingsImpl) window.updateSettingsImpl(); 
+        else console.error("Sketch not loaded yet");
+      }
+    };
+
+    // 页面导航功能
+    function showPage(page) {
+      if (page === 'main') {
+        document.getElementById('main-content').style.display = 'block';
+        document.getElementById('about-content').style.display = 'none';
+        updateNavLinks('main');
+      } else if (page === 'about') {
+        document.getElementById('main-content').style.display = 'none';
+        document.getElementById('about-content').style.display = 'block';
+        updateNavLinks('about');
+      }
+    }
+
+    function updateNavLinks(activePage) {
+      document.querySelectorAll('.nav-links a').forEach(a => {
+        a.classList.remove('active');
+        if ((activePage === 'main' && a.textContent === 'Create') || 
+            (activePage === 'about' && a.textContent === 'About')) {
+          a.classList.add('active');
+        }
+      });
+    }
+
+    // 字符计数器
+    document.getElementById('userInput').addEventListener('input', function() {
+      const currentLength = this.value.length;
+      document.getElementById('charCount').textContent = currentLength;
+      if (currentLength > 500) {
+        this.value = this.value.substring(0, 500);
+        document.getElementById('charCount').textContent = 500;
+      }
+    });
+
+    // 样式按钮激活状态
+    document.querySelectorAll('#styleButtons button').forEach(button => {
+      button.addEventListener('click', function() {
+        document.querySelectorAll('#styleButtons button').forEach(btn => {
+          btn.classList.remove('active');
+        });
+        this.classList.add('active');
+      });
+    });
+
+    // 初始化页面
+    showPage('main');
+  </script>
+
+  <!-- p5.js 画布代码 -->
+  <script>
+    // ============== p5.js 代码 ==============
+    let phrases = [];
+    let currentStyle = 'default';
+    let animationFrame = 0;
+    let isLooping = false;
+
+    // 样式设置
+    let fontSize = 32;
+    let fontWeight = 'bold';
+    let fontColor = '#000000';
+    let fontFamily = 'sans-serif';
+    let bgColor = '#ffffff';
+    let lineHeight = 1.5;
+    let letterSpacing = 0;
+    let textAlignMode = 'center';
+
+    function setup() {
+      const canvas = createCanvas(windowWidth - 40, 500);
+      canvas.parent('canvas-container');
+      textWrap(WORD);
+      frameRate(60);
+      
+      // 将实现函数赋给全局对象
+      window.addManifestoImpl = function(type) {
+        const manifestos = {
+          'Future': ["Design is the future's language.", "We shape tomorrow through today's design."],
+          'Ethical': ["Design with integrity.", "Ethics are the foundation of good design."],
+          'Human-Centered': ["Empathy drives design.", "Design for people, not users."],
+          'Experimental': ["Break the rules.", "Experimentation leads to innovation."],
+          'Radical': ["Design is political.", "Challenge conventions."],
+          'Playful': ["Play is serious.", "Design for delight."]
+        };
+        
+        if (phrases.length + manifestos[type].length > 10) {
+          alert("Maximum 10 paragraphs allowed");
+          return;
+        }
+        phrases.push(...manifestos[type]);
+        redraw();
+      };
+
+      window.addCustomImpl = function() {
+        const input = document.getElementById('userInput');
+        const lines = input.value.split('\n').filter(line => line.trim() !== '');
+        if (lines.length === 0) return;
+        if (phrases.length + lines.length > 10) {
+          alert("Maximum 10 paragraphs allowed");
+          return;
+        }
+        phrases.push(...lines);
+        input.value = '';
+        document.getElementById('charCount').textContent = '0';
+        redraw();
+      };
+
+      window.clearAllImpl = function() {
+        phrases = [];
+        redraw();
+      };
+
+      window.setStyleImpl = function(style) {
+        currentStyle = style;
+        const needsAnimation = ['chaos', 'glitch', 'wave', 'spiral'].includes(style);
+        if (needsAnimation) {
+          loop();
+          isLooping = true;
+        } else {
+          noLoop();
+          isLooping = false;
+          redraw();
+        }
+        console.log("Style set to:", style, "Animation:", needsAnimation);
+      };
+
+      window.updateSettingsImpl = function() {
+        fontSize = parseInt(document.getElementById('fontSize').value);
+        fontWeight = document.getElementById('fontWeight').value;
+        fontColor = document.getElementById('fontColor').value;
+        fontFamily = document.getElementById('fontFamily').value;
+        bgColor = document.getElementById('bgColor').value;
+        lineHeight = parseFloat(document.getElementById('lineHeight').value);
+        letterSpacing = parseFloat(document.getElementById('letterSpacing').value);
+        textAlignMode = document.getElementById('textAlign').value;
+        redraw();
+      };
+
+      console.log("p5.js sketch 初始化完成！");
+    }
+
+    function draw() {
+      background(bgColor);
+      textSize(fontSize);
+      textStyle(fontWeight === 'bold' ? BOLD : NORMAL);
+      fill(fontColor);
+      textFont(fontFamily);
+      
+      // 文本对齐设置
+      if (textAlignMode !== 'justify') {
+        textAlign(
+          textAlignMode === 'left' ? LEFT : 
+          textAlignMode === 'right' ? RIGHT : CENTER, 
+          CENTER
+        );
+      }
+
+      // 行高和字间距
+      textLeading(fontSize * lineHeight);
+      if (letterSpacing !== 0) {
+        drawingContext.letterSpacing = `${letterSpacing}px`;
+      }
+
+      animationFrame += 1;
+
+      // 渲染当前样式
+      switch (currentStyle) {
+        case 'chaos':
+          renderChaosStyle();
+          break;
+        case 'glitch':
+          renderGlitchStyle();
+          break;
+        case 'wave':
+          renderWaveStyle();
+          break;
+        case 'spiral':
+          renderSpiralStyle();
+          break;
+        default:
+          renderDefaultStyle();
+      }
+    }
+
+    function renderSpiralStyle() {
+      background(245);
+      push();
+      translate(width/2, height/2);
+      
+      // 螺旋动画参数
+      const spiralSpeed = 0.03;
+      const spiralTightness = 0.3;
+      const baseRadius = 50;
+      
+      rotate(animationFrame * spiralSpeed);
+      
+      for (let i = 0; i < phrases.length; i++) {
+        push();
+        const radius = baseRadius + i * 30;
+        const angle = animationFrame * spiralSpeed + i * spiralTightness;
+        const x = cos(angle) * radius;
+        const y = sin(angle) * radius;
+        
+        translate(x, y);
+        rotate(angle + PI/2);
+        
+        if (textAlignMode === 'justify') {
+          justifyText(phrases[i], 0, 0, 200);
+        } else {
+          text(phrases[i], 0, 0);
+        }
+        pop();
+      }
+      pop();
+    }
+
+    function renderDefaultStyle() {
+      if (textAlignMode === 'justify') {
+        for (let i = 0; i < phrases.length; i++) {
+          justifyText(phrases[i], width/2, (i+1)*(fontSize*lineHeight*1.5), width*0.8);
+        }
+      } else {
+        for (let i = 0; i < phrases.length; i++) {
+          text(phrases[i], width/2, (i+1)*(fontSize*lineHeight*1.5));
+        }
+      }
+    }
+
+    function justifyText(txt, x, y, maxWidth) {
+      push();
+      textAlign(LEFT, CENTER);
+      const words = txt.split(' ');
+      const spaceWidth = textWidth(' ');
+      let currentLine = [];
+      let currentWidth = 0;
+      const lines = [];
+      
+      for (const word of words) {
+        const wordWidth = textWidth(word);
+        if (currentWidth + wordWidth + (currentLine.length * spaceWidth) <= maxWidth) {
+          currentLine.push(word);
+          currentWidth += wordWidth;
+        } else {
+          lines.push(currentLine);
+          currentLine = [word];
+          currentWidth = wordWidth;
+        }
+      }
+      if (currentLine.length > 0) lines.push(currentLine);
+      
+      const lineHeightVal = fontSize * lineHeight;
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        if (line.length === 0) continue;
+        
+        const wordsWidth = line.reduce((sum, word) => sum + textWidth(word), 0);
+        const totalSpacing = maxWidth - wordsWidth;
+        const spacing = line.length > 1 ? totalSpacing / (line.length - 1) : 0;
+        
+        let currentX = x - maxWidth/2;
+        for (const word of line) {
+          text(word, currentX, y + (i * lineHeightVal));
+          currentX += textWidth(word) + spacing;
+        }
+      }
+      pop();
+    }
+
+    function windowResized() {
+      resizeCanvas(windowWidth - 40, 500);
+      redraw();
+    }
+  </script>
+</body>
+</html>
