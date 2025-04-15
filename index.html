@@ -13,6 +13,7 @@
       --accent-color: #4a6bff;
       --border-color: #e0e0e0;
       --card-bg: #ffffff;
+      --tab-inactive: #f0f0f0;
     }
 
     body {
@@ -22,55 +23,106 @@
       margin: 0;
       padding: 0;
       line-height: 1.6;
-    }
-
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 2rem;
-    }
-
-    header {
+      height: 100vh;
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 2rem;
-      padding-bottom: 1rem;
+      flex-direction: column;
+    }
+
+    .app-container {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .editor-panel {
+      width: 40%;
+      padding: 1.5rem;
+      overflow-y: auto;
+      border-right: 1px solid var(--border-color);
+    }
+
+    .preview-panel {
+      width: 60%;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .tabs {
+      display: flex;
+      margin-bottom: 1rem;
       border-bottom: 1px solid var(--border-color);
     }
 
-    h1 {
-      font-weight: 600;
-      font-size: 1.8rem;
-      margin: 0;
-    }
-
-    .nav-links {
-      display: flex;
-      gap: 1rem;
-    }
-
-    .nav-links a {
-      text-decoration: none;
-      color: var(--text-color);
+    .tab {
+      padding: 0.75rem 1.5rem;
+      cursor: pointer;
+      background-color: var(--tab-inactive);
+      border: 1px solid var(--border-color);
+      border-bottom: none;
+      border-radius: 8px 8px 0 0;
+      margin-right: 0.5rem;
       font-weight: 500;
+      transition: all 0.2s;
     }
 
-    .nav-links a:hover {
+    .tab.active {
+      background-color: var(--card-bg);
       color: var(--accent-color);
-    }
-
-    .nav-links a.active {
-      color: var(--accent-color);
+      border-color: var(--border-color);
+      border-bottom: 1px solid var(--card-bg);
+      margin-bottom: -1px;
       font-weight: 600;
     }
 
-    .card {
-      background-color: var(--card-bg);
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    .tab-content {
+      display: none;
       padding: 1.5rem;
-      margin-bottom: 2rem;
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-top: none;
+      border-radius: 0 0 8px 8px;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    #canvas-container {
+      flex: 1;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      background-color: white;
+      position: relative;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    .export-buttons {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 1.5rem;
+      justify-content: flex-end;
+    }
+
+    .export-button {
+      padding: 0.75rem 1.5rem;
+      background-color: var(--accent-color);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .export-button:hover {
+      background-color: #3a5bef;
     }
 
     .card-title {
@@ -140,20 +192,6 @@
       width: 100%;
     }
 
-    #canvas-container {
-      width: 100%;
-      min-height: 500px;
-      max-height: 800px;
-      border-radius: 12px;
-      overflow: hidden;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-      margin-top: 2rem;
-    }
-
-    canvas {
-      display: block;
-    }
-
     .word-count {
       font-size: 0.8rem;
       color: #666;
@@ -161,35 +199,23 @@
       margin-top: -0.5rem;
       margin-bottom: 1rem;
     }
-
-    .about-content {
-      max-width: 800px;
-      margin: 0 auto;
-      padding: 2rem;
-    }
-
-    .about-content h2 {
-      color: var(--accent-color);
-      margin-top: 2rem;
-    }
-
-    .about-content p {
-      margin-bottom: 1rem;
-    }
   </style>
 </head>
 <body>
-  <div id="app">
-    <div class="container" id="main-content">
-      <header>
-        <h1>The Manifestory</h1>
-        <div class="nav-links">
-          <a href="#" class="active" onclick="showPage('main')">Create</a>
-          <a href="#" onclick="showPage('about')">About</a>
-        </div>
-      </header>
+  <div class="app-container">
+    <!-- Left Editor Panel -->
+    <div class="editor-panel">
+      <h1>The Manifestory</h1>
+      
+      <!-- Tab Navigation -->
+      <div class="tabs">
+        <div class="tab active" onclick="showTab('content')">Content</div>
+        <div class="tab" onclick="showTab('style')">Style</div>
+        <div class="tab" onclick="showTab('font')">Type Setting</div>
+      </div>
 
-      <div class="card">
+      <!-- Content Tab -->
+      <div id="content-tab" class="tab-content active">
         <h2 class="card-title">Content</h2>
         <div class="button-group">
           <button onclick="appFunctions.addManifesto('Future')">Future Manifesto</button>
@@ -200,45 +226,51 @@
           <button onclick="appFunctions.addManifesto('Playful')">Playful</button>
         </div>
         
-        <textarea id="userInput" placeholder="Type your manifesto here (max 500 characters)..." rows="8"></textarea>
-        <div class="word-count"><span id="charCount">0</span>/500 characters</div>
-        <button onclick="appFunctions.addCustom()">Add Custom Manifesto</button>
+        <textarea id="userInput" placeholder="Type your manifesto:" rows="8"></textarea>
+        <div class="word-count"><span id="charCount">0</span>/500</div>
+        <button onclick="appFunctions.addCustom()">Add custom content</button>
         <button onclick="appFunctions.clearAll()" style="margin-left: 0.5rem;">Clear All</button>
       </div>
 
-      <div class="card">
+      <!-- Style Tab -->
+      <div id="style-tab" class="tab-content">
         <h2 class="card-title">Style</h2>
         <div class="button-group" id="styleButtons">
           <button onclick="appFunctions.setStyle('default')" class="active">Default</button>
-          <button onclick="appFunctions.setStyle('chaos')">Chaos</button>
+          <button onclick="appFunctions.setStyle('shake')">Shake</button>
           <button onclick="appFunctions.setStyle('glitch')">Glitch</button>
-          <button onclick="appFunctions.setStyle('wave')">Wave</button>
+          <button onclick="appFunctions.setStyle('jump')">Jump</button>
           <button onclick="appFunctions.setStyle('spiral')">Spiral</button>
+          <button onclick="appFunctions.setStyle('chaos')">Chaos</button>
+          <button onclick="appFunctions.setStyle('spin')">Spin</button>
+          <button onclick="appFunctions.setStyle('dance')">Dance</button>
+          <button onclick="appFunctions.setStyle('rain')">Rain</button>
         </div>
       </div>
 
-      <div class="card">
-        <h2 class="card-title">Settings</h2>
+      <!-- Font Tab -->
+      <div id="font-tab" class="tab-content">
+        <h2 class="card-title">Type Setting</h2>
         <div class="settings-grid">
           <div class="setting">
             <label for="fontSize">Font Size</label>
             <input type="range" id="fontSize" min="10" max="100" value="32" oninput="appFunctions.updateSettings()">
           </div>
           <div class="setting">
-            <label for="fontWeight">Font Weight</label>
+            <label for="fontWeight">Weight</label>
             <select id="fontWeight" onchange="appFunctions.updateSettings()">
-              <option value="normal">Normal</option>
+              <option value="normal">Regular</option>
               <option value="bold" selected>Bold</option>
             </select>
           </div>
           <div class="setting">
-            <label for="fontColor">Font Color</label>
+            <label for="fontColor">Color</label>
             <input type="color" id="fontColor" value="#000000" onchange="appFunctions.updateSettings()">
           </div>
           <div class="setting">
-            <label for="fontFamily">Font Family</label>
+            <label for="fontFamily">Font</label>
             <select id="fontFamily" onchange="appFunctions.updateSettings()">
-              <option value="sans-serif">Sans-serif</option>
+              <option value="sans-serif">Sans-Serif</option>
               <option value="serif">Serif</option>
               <option value="monospace">Monospace</option>
             </select>
@@ -248,18 +280,18 @@
             <input type="color" id="bgColor" value="#ffffff" onchange="appFunctions.updateSettings()">
           </div>
           <div class="setting">
-            <label for="lineHeight">Line Height</label>
+            <label for="lineHeight">Leading</label>
             <input type="range" id="lineHeight" min="0.8" max="3" step="0.1" value="1.5" oninput="appFunctions.updateSettings()">
           </div>
           <div class="setting">
-            <label for="letterSpacing">Letter Spacing</label>
+            <label for="letterSpacing">Kerning</label>
             <input type="range" id="letterSpacing" min="-2" max="10" value="0" oninput="appFunctions.updateSettings()">
           </div>
           <div class="setting">
-            <label for="textAlign">Text Alignment</label>
+            <label for="textAlign">Text Align</label>
             <select id="textAlign" onchange="appFunctions.updateSettings()">
               <option value="left">Left</option>
-              <option value="center" selected>Center</option>
+              <option value="center">Center</option>
               <option value="right">Right</option>
               <option value="justify">Justify</option>
             </select>
@@ -267,106 +299,47 @@
         </div>
       </div>
 
-      <div id="canvas-container">
-        <!-- Canvas will be inserted here by p5.js -->
+      <!-- Export Buttons (Only Image Export Remains) -->
+      <div class="export-buttons">
+        <button class="export-button" onclick="exportAsImage()">Export Image</button>
       </div>
     </div>
 
-    <div class="container" id="about-content" style="display: none;">
-      <header>
-        <h1>The Manifestory</h1>
-        <div class="nav-links">
-          <a href="#" onclick="showPage('main')">Create</a>
-          <a href="#" class="active" onclick="showPage('about')">About</a>
-        </div>
-      </header>
-
-      <div class="about-content">
-        <h2>What is The Manifestory?</h2>
-        <p>An interactive platform for creating and visualizing design manifestos with dynamic typography effects.</p>
-        
-        <h2>How to Use</h2>
-        <p>1. Add content using preset manifestos or your own text (max 12 paragraphs)</p>
-        <p>2. Select a visual style (Default, Chaos, Glitch, Wave, or Spiral)</p>
-        <p>3. Adjust typography settings to customize appearance</p>
+    <!-- Right Preview Panel -->
+    <div class="preview-panel">
+      <h2>Preview</h2>
+      <div id="canvas-container">
+        <!-- p5.js canvas will render here -->
       </div>
     </div>
   </div>
 
   <script>
-    // 全局应用函数接口
-    window.appFunctions = {
-      addManifesto: function(type) { 
-        if (window.addManifestoImpl) window.addManifestoImpl(type); 
-      },
-      addCustom: function() { 
-        if (window.addCustomImpl) window.addCustomImpl(); 
-      },
-      clearAll: function() { 
-        if (window.clearAllImpl) window.clearAllImpl(); 
-      },
-      setStyle: function(style) { 
-        if (window.setStyleImpl) window.setStyleImpl(style); 
-      },
-      updateSettings: function() { 
-        if (window.updateSettingsImpl) window.updateSettingsImpl(); 
-      }
-    };
-
-    // 页面导航功能
-    function showPage(page) {
-      if (page === 'main') {
-        document.getElementById('main-content').style.display = 'block';
-        document.getElementById('about-content').style.display = 'none';
-        updateNavLinks('main');
-      } else if (page === 'about') {
-        document.getElementById('main-content').style.display = 'none';
-        document.getElementById('about-content').style.display = 'block';
-        updateNavLinks('about');
-      }
+    // Tab switching functionality
+    function showTab(tabId) {
+      // Hide all content
+      document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+      });
+      
+      // Deactivate all tabs
+      document.querySelectorAll('.tab').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      
+      // Show selected content
+      document.getElementById(`${tabId}-tab`).classList.add('active');
+      
+      // Activate selected tab
+      event.currentTarget.classList.add('active');
     }
 
-    function updateNavLinks(activePage) {
-      document.querySelectorAll('.nav-links a').forEach(a => {
-        a.classList.remove('active');
-        if ((activePage === 'main' && a.textContent === 'Create') || 
-            (activePage === 'about' && a.textContent === 'About')) {
-          a.classList.add('active');
-        }
-      });
-    }
-
-    // 字符计数器
-    document.getElementById('userInput').addEventListener('input', function() {
-      const currentLength = this.value.length;
-      document.getElementById('charCount').textContent = currentLength;
-      if (currentLength > 500) {
-        this.value = this.value.substring(0, 500);
-        document.getElementById('charCount').textContent = 500;
-      }
-    });
-
-    // 样式按钮激活状态
-    document.querySelectorAll('#styleButtons button').forEach(button => {
-      button.addEventListener('click', function() {
-        document.querySelectorAll('#styleButtons button').forEach(btn => {
-          btn.classList.remove('active');
-        });
-        this.classList.add('active');
-      });
-    });
-
-    // 初始化页面
-    showPage('main');
-  </script>
-
-  <script>
-    // ============== p5.js 代码 ==============
+    // ============== p5.js Code ==============
     let phrases = [];
     let currentStyle = 'default';
     let animationFrame = 0;
 
-    // 样式设置
+    // Style settings
     let fontSize = 32;
     let fontWeight = 'bold';
     let fontColor = '#000000';
@@ -376,88 +349,179 @@
     let letterSpacing = 0;
     let textAlignMode = 'center';
 
+    // Particle effect variables
+    let particles = [];
+    class Particle {
+      constructor(x, y, text) {
+        this.pos = createVector(x, y);
+        this.vel = p5.Vector.random2D().mult(random(0.5, 2));
+        this.acc = createVector(0, 0);
+        this.text = text;
+        this.life = 255;
+        this.size = random(fontSize * 0.8, fontSize * 1.2);
+      }
+      
+      update() {
+        this.vel.add(this.acc);
+        this.pos.add(this.vel);
+        this.acc.mult(0);
+        this.life -= 1;
+      }
+      
+      applyForce(force) {
+        this.acc.add(force);
+      }
+      
+      show() {
+        push();
+        if (fontColor.startsWith('#')) {
+          fill(fontColor.substring(0, 7) + Math.floor(this.life).toString(16).padStart(2, '0'));
+        } else {
+          fill(fontColor.replace(')', `, ${this.life/255})`));
+        }
+        textSize(this.size);
+        text(this.text, this.pos.x, this.pos.y);
+        pop();
+      }
+    }
+
+    // Spin effect variables
+    let spinAngle = 0;
+
+    // Dance effect variables
+    let danceOffsets = [];
+
+    // Rain effect variables
+    let rainDrops = [];
+
     function setup() {
       const container = document.getElementById('canvas-container');
-      const canvas = createCanvas(container.offsetWidth, calculateCanvasHeight());
+      const canvas = createCanvas(container.offsetWidth, container.offsetHeight);
       canvas.parent('canvas-container');
       textWrap(WORD);
       frameRate(60);
-      
-      // 将实现函数赋给全局对象
-      window.addManifestoImpl = function(type) {
-        const manifestos = {
-          'Future': ["Design is the future's language.", "We shape tomorrow through today's design."],
-          'Ethical': ["Design with integrity.", "Ethics are the foundation of good design."],
-          'Human-Centered': ["Empathy drives design.", "Design for people, not users."],
-          'Experimental': ["Break the rules.", "Experimentation leads to innovation."],
-          'Radical': ["Design is political.", "Challenge conventions."],
-          'Playful': ["Play is serious.", "Design for delight."]
-        };
-        
-        if (phrases.length + manifestos[type].length > 12) {
-          alert("Maximum 12 paragraphs allowed");
-          return;
+
+      // Assign functions to global object
+      window.appFunctions = {
+        addManifesto: function(type) { 
+          const manifestos = {
+            'Future': ["Design is the future's language.", "We shape tomorrow through today's design."],
+            'Ethical': ["Design with integrity.", "Ethics are the foundation of good design."],
+            'Human-Centered': ["Empathy drives design.", "Design for people, not users."],
+            'Experimental': ["Break the rules.", "Experimentation leads to innovation."],
+            'Radical': ["Design is political.", "Challenge conventions."],
+            'Playful': ["Play is serious.", "Design for delight."]
+          };
+          
+          if (phrases.length + manifestos[type].length > 12) {
+            alert("Maximum 12 paragraphs allowed");
+            return;
+          }
+          phrases.push(...manifestos[type]);
+          resetEffects();
+          redraw();
+        },
+
+        addCustom: function() {
+          const input = document.getElementById('userInput');
+          const lines = input.value.split('\n').filter(line => line.trim() !== '');
+          if (lines.length === 0) return;
+          if (phrases.length + lines.length > 12) {
+            alert("Maximum 12 paragraphs allowed");
+            return;
+          }
+          phrases.push(...lines);
+          input.value = '';
+          document.getElementById('charCount').textContent = '0';
+          resetEffects();
+          redraw();
+        },
+
+        clearAll: function() {
+          phrases = [];
+          resetEffects();
+          redraw();
+        },
+
+        setStyle: function(style) {
+          currentStyle = style;
+          const needsAnimation = ['shake', 'glitch', 'jump', 'spiral', 'chaos', 'spin', 'dance', 'rain'].includes(style);
+          if (needsAnimation) {
+            loop();
+            resetEffects();
+          } else {
+            noLoop();
+          }
+          redraw();
+        },
+
+        updateSettings: function() {
+          fontSize = parseInt(document.getElementById('fontSize').value);
+          fontWeight = document.getElementById('fontWeight').value;
+          fontColor = document.getElementById('fontColor').value;
+          fontFamily = document.getElementById('fontFamily').value;
+          bgColor = document.getElementById('bgColor').value;
+          lineHeight = parseFloat(document.getElementById('lineHeight').value);
+          letterSpacing = parseFloat(document.getElementById('letterSpacing').value);
+          textAlignMode = document.getElementById('textAlign').value;
+          redraw();
         }
-        phrases.push(...manifestos[type]);
-        resizeCanvas(width, calculateCanvasHeight());
-        redraw();
       };
 
-      window.addCustomImpl = function() {
-        const input = document.getElementById('userInput');
-        const lines = input.value.split('\n').filter(line => line.trim() !== '');
-        if (lines.length === 0) return;
-        if (phrases.length + lines.length > 12) {
-          alert("Maximum 12 paragraphs allowed");
-          return;
+      // Character counter
+      document.getElementById('userInput').addEventListener('input', function() {
+        const currentLength = this.value.length;
+        document.getElementById('charCount').textContent = currentLength;
+        if (currentLength > 500) {
+          this.value = this.value.substring(0, 500);
+          document.getElementById('charCount').textContent = 500;
         }
-        phrases.push(...lines);
-        input.value = '';
-        document.getElementById('charCount').textContent = '0';
-        resizeCanvas(width, calculateCanvasHeight());
-        redraw();
-      };
+      });
 
-      window.clearAllImpl = function() {
-        phrases = [];
-        resizeCanvas(width, calculateCanvasHeight());
-        redraw();
-      };
-
-      window.setStyleImpl = function(style) {
-        currentStyle = style;
-        const needsAnimation = ['chaos', 'glitch', 'wave', 'spiral'].includes(style);
-        if (needsAnimation) {
-          loop();
-        } else {
-          noLoop();
-        }
-        redraw();
-      };
-
-      window.updateSettingsImpl = function() {
-        fontSize = parseInt(document.getElementById('fontSize').value);
-        fontWeight = document.getElementById('fontWeight').value;
-        fontColor = document.getElementById('fontColor').value;
-        fontFamily = document.getElementById('fontFamily').value;
-        bgColor = document.getElementById('bgColor').value;
-        lineHeight = parseFloat(document.getElementById('lineHeight').value);
-        letterSpacing = parseFloat(document.getElementById('letterSpacing').value);
-        textAlignMode = document.getElementById('textAlign').value;
-        resizeCanvas(width, calculateCanvasHeight());
-        redraw();
-      };
+      // Style buttons active state
+      document.querySelectorAll('#styleButtons button').forEach(button => {
+        button.addEventListener('click', function() {
+          document.querySelectorAll('#styleButtons button').forEach(btn => {
+            btn.classList.remove('active');
+          });
+          this.classList.add('active');
+        });
+      });
     }
 
-    function calculateCanvasHeight() {
-      const baseHeight = 500;
-      const paragraphHeight = phrases.length * fontSize * lineHeight * 1.2;
-      return Math.min(800, Math.max(baseHeight, paragraphHeight + 100));
+    function resetEffects() {
+      particles = [];
+      spinAngle = 0;
+      
+      // Initialize dance offsets
+      danceOffsets = [];
+      for (let i = 0; i < phrases.length; i++) {
+        danceOffsets.push({
+          x: 0,
+          y: 0,
+          angle: 0,
+          size: 1
+        });
+      }
+      
+      // Initialize rain drops
+      rainDrops = [];
+      for (let i = 0; i < phrases.length; i++) {
+        rainDrops.push({
+          x: random(width),
+          y: random(-500, -100),
+          speed: random(2, 5),
+          rotation: random(TWO_PI)
+        });
+      }
     }
 
     function draw() {
       try {
+        // Draw background
         background(bgColor);
+        
+        // Apply text styles
         textSize(fontSize);
         textStyle(fontWeight === 'bold' ? BOLD : NORMAL);
         fill(fontColor);
@@ -476,24 +540,37 @@
 
         animationFrame += 1;
 
+        // Render current style
         switch (currentStyle) {
-          case 'chaos':
-            renderChaosStyle();
+          case 'shake':
+            renderShakeStyle();
             break;
           case 'glitch':
             renderGlitchStyle();
             break;
-          case 'wave':
-            renderWaveStyle();
+          case 'jump':
+            renderJumpStyle();
             break;
           case 'spiral':
             renderSpiralStyle();
+            break;
+          case 'chaos':
+            renderChaosStyle();
+            break;
+          case 'spin':
+            renderSpinStyle();
+            break;
+          case 'dance':
+            renderDanceStyle();
+            break;
+          case 'rain':
+            renderRainStyle();
             break;
           default:
             renderDefaultStyle();
         }
       } catch (e) {
-        console.error("Draw error:", e);
+        console.error("Render error:", e);
         background(255, 0, 0);
         fill(0);
         text("Error: " + e.message, 20, 20);
@@ -515,7 +592,7 @@
       }
     }
 
-    function renderChaosStyle() {
+    function renderShakeStyle() {
       const startY = fontSize * 2;
       const paragraphSpacing = fontSize * lineHeight * 1.8;
       
@@ -540,7 +617,7 @@
       }
     }
 
-    function renderWaveStyle() {
+    function renderJumpStyle() {
       const startY = height * 0.3;
       const paragraphSpacing = fontSize * lineHeight * 1.8;
       
@@ -573,6 +650,152 @@
         pop();
       }
       pop();
+    }
+
+    function renderChaosStyle() {
+      background(bgColor);
+      
+      // Initialize particles if empty
+      if (particles.length === 0 && phrases.length > 0) {
+        for (let i = 0; i < phrases.length; i++) {
+          const words = phrases[i].split(' ');
+          for (let j = 0; j < words.length; j++) {
+            for (let k = 0; k < words[j].length; k++) {
+              particles.push(new Particle(
+                random(width),
+                random(height),
+                words[j][k]
+              ));
+            }
+          }
+        }
+      }
+      
+      // Update and display particles
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        
+        // More chaotic forces
+        const centerForce = p5.Vector.sub(createVector(width/2, height/2), p.pos);
+        centerForce.setMag(random(0.01, 0.1));
+        p.applyForce(centerForce);
+        
+        // Random forces
+        const randomForce = p5.Vector.random2D().mult(random(0.5, 2));
+        p.applyForce(randomForce);
+        
+        // Repulsion from mouse
+        if (mouseX && mouseY) {
+          const mouseDist = dist(mouseX, mouseY, p.pos.x, p.pos.y);
+          if (mouseDist < 150) {
+            const repelForce = p5.Vector.sub(p.pos, createVector(mouseX, mouseY));
+            repelForce.setMag(map(mouseDist, 0, 150, 2, 0));
+            p.applyForce(repelForce);
+          }
+        }
+        
+        p.update();
+        p.show();
+        
+        // Reset particles that go off screen
+        if (p.pos.x < -50 || p.pos.x > width + 50 || p.pos.y < -50 || p.pos.y > height + 50) {
+          p.pos = createVector(random(width), random(height));
+          p.vel = p5.Vector.random2D().mult(random(1, 3));
+          p.life = 255;
+        }
+      }
+    }
+
+    function renderSpinStyle() {
+      background(bgColor);
+      spinAngle += 0.02;
+      
+      for (let i = 0; i < phrases.length; i++) {
+        const x = width/2;
+        const y = height/2 + (i - phrases.length/2) * fontSize * lineHeight * 2;
+        
+        push();
+        translate(x, y);
+        rotate(spinAngle + i * 0.2);
+        
+        if (textAlignMode === 'justify') {
+          justifyText(phrases[i], 0, 0, width*0.8);
+        } else {
+          text(phrases[i], 0, 0);
+        }
+        pop();
+      }
+    }
+
+    function renderDanceStyle() {
+      background(bgColor);
+      
+      for (let i = 0; i < phrases.length; i++) {
+        // Update dance offsets
+        danceOffsets[i].x = sin(frameCount * 0.05 + i) * 30;
+        danceOffsets[i].y = cos(frameCount * 0.07 + i * 1.3) * 20;
+        danceOffsets[i].angle = sin(frameCount * 0.03 + i) * 0.2;
+        danceOffsets[i].size = map(sin(frameCount * 0.04 + i), -1, 1, 0.9, 1.1);
+        
+        const x = width/2 + danceOffsets[i].x;
+        const y = height * 0.3 + (i * fontSize * lineHeight * 1.8) + danceOffsets[i].y;
+        
+        push();
+        translate(x, y);
+        rotate(danceOffsets[i].angle);
+        scale(danceOffsets[i].size);
+        
+        // Color variation
+        fill(
+          red(fontColor) + sin(frameCount * 0.02 + i) * 50,
+          green(fontColor) + cos(frameCount * 0.03 + i) * 50,
+          blue(fontColor) + sin(frameCount * 0.05 + i) * 50
+        );
+        
+        if (textAlignMode === 'justify') {
+          justifyText(phrases[i], 0, 0, width*0.8);
+        } else {
+          text(phrases[i], 0, 0);
+        }
+        pop();
+      }
+    }
+
+    function renderRainStyle() {
+      background(bgColor);
+      
+      if (!rainDrops || !phrases || phrases.length === 0) return;
+      
+      for (let i = 0; i < phrases.length; i++) {
+        if (!rainDrops[i]) continue;
+        
+        const drop = rainDrops[i];
+        
+        // Update position
+        drop.y += drop.speed;
+        drop.rotation += 0.01;
+        
+        // Reset if fallen off screen
+        if (drop.y > height + 50) {
+          drop.y = random(-200, -50);
+          drop.x = random(width);
+        }
+        
+        // Make text fade as it falls
+        const alpha = map(drop.y, -50, height/2, 255, 50);
+        
+        // Fixed color handling
+        let textColor = color(fontColor);
+        textColor.setAlpha(alpha);
+        fill(textColor);
+        
+        // Draw text with rotation
+        push();
+        translate(drop.x, drop.y);
+        rotate(drop.rotation);
+        text(phrases[i], 0, 0);
+        pop();
+      }
     }
 
     function justifyText(txt, x, y, maxWidth) {
@@ -615,9 +838,18 @@
       pop();
     }
 
+    // Export as Image only
+    function exportAsImage() {
+      const canvas = document.querySelector('canvas');
+      const link = document.createElement('a');
+      link.download = 'manifesto-export.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    }
+
     function windowResized() {
       const container = document.getElementById('canvas-container');
-      resizeCanvas(container.offsetWidth, calculateCanvasHeight());
+      resizeCanvas(container.offsetWidth, container.offsetHeight);
       redraw();
     }
   </script>
