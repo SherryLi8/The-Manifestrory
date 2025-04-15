@@ -142,7 +142,8 @@
 
     #canvas-container {
       width: 100%;
-      height: 500px;
+      min-height: 500px;
+      max-height: 800px;
       border-radius: 12px;
       overflow: hidden;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
@@ -161,7 +162,6 @@
       margin-bottom: 1rem;
     }
 
-    /* About page styles */
     .about-content {
       max-width: 800px;
       margin: 0 auto;
@@ -286,7 +286,7 @@
         <p>An interactive platform for creating and visualizing design manifestos with dynamic typography effects.</p>
         
         <h2>How to Use</h2>
-        <p>1. Add content using preset manifestos or your own text</p>
+        <p>1. Add content using preset manifestos or your own text (max 12 paragraphs)</p>
         <p>2. Select a visual style (Default, Chaos, Glitch, Wave, or Spiral)</p>
         <p>3. Adjust typography settings to customize appearance</p>
       </div>
@@ -297,26 +297,19 @@
     // 全局应用函数接口
     window.appFunctions = {
       addManifesto: function(type) { 
-        console.log("Adding manifesto:", type);
         if (window.addManifestoImpl) window.addManifestoImpl(type); 
-        else console.error("Sketch not loaded yet");
       },
       addCustom: function() { 
         if (window.addCustomImpl) window.addCustomImpl(); 
-        else console.error("Sketch not loaded yet");
       },
       clearAll: function() { 
         if (window.clearAllImpl) window.clearAllImpl(); 
-        else console.error("Sketch not loaded yet");
       },
       setStyle: function(style) { 
-        console.log("Setting style:", style);
         if (window.setStyleImpl) window.setStyleImpl(style); 
-        else console.error("Sketch not loaded yet");
       },
       updateSettings: function() { 
         if (window.updateSettingsImpl) window.updateSettingsImpl(); 
-        else console.error("Sketch not loaded yet");
       }
     };
 
@@ -367,13 +360,11 @@
     showPage('main');
   </script>
 
-  <!-- p5.js 画布代码 -->
   <script>
     // ============== p5.js 代码 ==============
     let phrases = [];
     let currentStyle = 'default';
     let animationFrame = 0;
-    let isLooping = false;
 
     // 样式设置
     let fontSize = 32;
@@ -386,7 +377,8 @@
     let textAlignMode = 'center';
 
     function setup() {
-      const canvas = createCanvas(windowWidth - 40, 500);
+      const container = document.getElementById('canvas-container');
+      const canvas = createCanvas(container.offsetWidth, calculateCanvasHeight());
       canvas.parent('canvas-container');
       textWrap(WORD);
       frameRate(60);
@@ -402,11 +394,12 @@
           'Playful': ["Play is serious.", "Design for delight."]
         };
         
-        if (phrases.length + manifestos[type].length > 10) {
-          alert("Maximum 10 paragraphs allowed");
+        if (phrases.length + manifestos[type].length > 12) {
+          alert("Maximum 12 paragraphs allowed");
           return;
         }
         phrases.push(...manifestos[type]);
+        resizeCanvas(width, calculateCanvasHeight());
         redraw();
       };
 
@@ -414,18 +407,20 @@
         const input = document.getElementById('userInput');
         const lines = input.value.split('\n').filter(line => line.trim() !== '');
         if (lines.length === 0) return;
-        if (phrases.length + lines.length > 10) {
-          alert("Maximum 10 paragraphs allowed");
+        if (phrases.length + lines.length > 12) {
+          alert("Maximum 12 paragraphs allowed");
           return;
         }
         phrases.push(...lines);
         input.value = '';
         document.getElementById('charCount').textContent = '0';
+        resizeCanvas(width, calculateCanvasHeight());
         redraw();
       };
 
       window.clearAllImpl = function() {
         phrases = [];
+        resizeCanvas(width, calculateCanvasHeight());
         redraw();
       };
 
@@ -434,13 +429,10 @@
         const needsAnimation = ['chaos', 'glitch', 'wave', 'spiral'].includes(style);
         if (needsAnimation) {
           loop();
-          isLooping = true;
         } else {
           noLoop();
-          isLooping = false;
-          redraw();
         }
-        console.log("Style set to:", style, "Animation:", needsAnimation);
+        redraw();
       };
 
       window.updateSettingsImpl = function() {
@@ -452,71 +444,121 @@
         lineHeight = parseFloat(document.getElementById('lineHeight').value);
         letterSpacing = parseFloat(document.getElementById('letterSpacing').value);
         textAlignMode = document.getElementById('textAlign').value;
+        resizeCanvas(width, calculateCanvasHeight());
         redraw();
       };
+    }
 
-      console.log("p5.js sketch 初始化完成！");
+    function calculateCanvasHeight() {
+      const baseHeight = 500;
+      const paragraphHeight = phrases.length * fontSize * lineHeight * 1.2;
+      return Math.min(800, Math.max(baseHeight, paragraphHeight + 100));
     }
 
     function draw() {
-      background(bgColor);
-      textSize(fontSize);
-      textStyle(fontWeight === 'bold' ? BOLD : NORMAL);
-      fill(fontColor);
-      textFont(fontFamily);
-      
-      // 文本对齐设置
-      if (textAlignMode !== 'justify') {
-        textAlign(
-          textAlignMode === 'left' ? LEFT : 
-          textAlignMode === 'right' ? RIGHT : CENTER, 
-          CENTER
-        );
-      }
+      try {
+        background(bgColor);
+        textSize(fontSize);
+        textStyle(fontWeight === 'bold' ? BOLD : NORMAL);
+        fill(fontColor);
+        textFont(fontFamily);
+        
+        if (textAlignMode !== 'justify') {
+          textAlign(
+            textAlignMode === 'left' ? LEFT : 
+            textAlignMode === 'right' ? RIGHT : CENTER, 
+            CENTER
+          );
+        }
 
-      // 行高和字间距
-      textLeading(fontSize * lineHeight);
-      if (letterSpacing !== 0) {
+        textLeading(fontSize * lineHeight);
         drawingContext.letterSpacing = `${letterSpacing}px`;
+
+        animationFrame += 1;
+
+        switch (currentStyle) {
+          case 'chaos':
+            renderChaosStyle();
+            break;
+          case 'glitch':
+            renderGlitchStyle();
+            break;
+          case 'wave':
+            renderWaveStyle();
+            break;
+          case 'spiral':
+            renderSpiralStyle();
+            break;
+          default:
+            renderDefaultStyle();
+        }
+      } catch (e) {
+        console.error("Draw error:", e);
+        background(255, 0, 0);
+        fill(0);
+        text("Error: " + e.message, 20, 20);
       }
+    }
 
-      animationFrame += 1;
+    function renderDefaultStyle() {
+      const startY = fontSize * 2;
+      const paragraphSpacing = fontSize * lineHeight * 1.8;
+      
+      if (textAlignMode === 'justify') {
+        for (let i = 0; i < phrases.length; i++) {
+          justifyText(phrases[i], width/2, startY + (i * paragraphSpacing), width*0.8);
+        }
+      } else {
+        for (let i = 0; i < phrases.length; i++) {
+          text(phrases[i], width/2, startY + (i * paragraphSpacing));
+        }
+      }
+    }
 
-      // 渲染当前样式
-      switch (currentStyle) {
-        case 'chaos':
-          renderChaosStyle();
-          break;
-        case 'glitch':
-          renderGlitchStyle();
-          break;
-        case 'wave':
-          renderWaveStyle();
-          break;
-        case 'spiral':
-          renderSpiralStyle();
-          break;
-        default:
-          renderDefaultStyle();
+    function renderChaosStyle() {
+      const startY = fontSize * 2;
+      const paragraphSpacing = fontSize * lineHeight * 1.8;
+      
+      for (let i = 0; i < phrases.length; i++) {
+        push();
+        translate(width/2 + random(-10, 10), startY + (i * paragraphSpacing) + random(-5, 5));
+        rotate(random(-0.1, 0.1));
+        text(phrases[i], 0, 0);
+        pop();
+      }
+    }
+
+    function renderGlitchStyle() {
+      const startY = fontSize * 2;
+      const paragraphSpacing = fontSize * lineHeight * 1.8;
+      
+      for (let i = 0; i < phrases.length; i++) {
+        if (frameCount % 10 === 0) {
+          fill(random(255), random(255), random(255));
+        }
+        text(phrases[i], width/2 + random(-2, 2), startY + (i * paragraphSpacing));
+      }
+    }
+
+    function renderWaveStyle() {
+      const startY = height * 0.3;
+      const paragraphSpacing = fontSize * lineHeight * 1.8;
+      
+      for (let i = 0; i < phrases.length; i++) {
+        const yOffset = sin(animationFrame * 0.05 + i) * 20;
+        text(phrases[i], width/2, startY + yOffset + (i * paragraphSpacing));
       }
     }
 
     function renderSpiralStyle() {
-      background(245);
       push();
       translate(width/2, height/2);
-      
-      // 螺旋动画参数
-      const spiralSpeed = 0.03;
-      const spiralTightness = 0.3;
-      const baseRadius = 50;
-      
-      rotate(animationFrame * spiralSpeed);
+      rotate(animationFrame * 0.03);
       
       for (let i = 0; i < phrases.length; i++) {
         push();
-        const radius = baseRadius + i * 30;
-        const angle = animationFrame * spiralSpeed + i * spiralTightness;
+        const radius = 50 + i * 30;
+        const angle = animationFrame * 0.03 + i * 0.3;
         const x = cos(angle) * radius;
         const y = sin(angle) * radius;
         
@@ -531,18 +573,6 @@
         pop();
       }
       pop();
-    }
-
-    function renderDefaultStyle() {
-      if (textAlignMode === 'justify') {
-        for (let i = 0; i < phrases.length; i++) {
-          justifyText(phrases[i], width/2, (i+1)*(fontSize*lineHeight*1.5), width*0.8);
-        }
-      } else {
-        for (let i = 0; i < phrases.length; i++) {
-          text(phrases[i], width/2, (i+1)*(fontSize*lineHeight*1.5));
-        }
-      }
     }
 
     function justifyText(txt, x, y, maxWidth) {
@@ -586,7 +616,8 @@
     }
 
     function windowResized() {
-      resizeCanvas(windowWidth - 40, 500);
+      const container = document.getElementById('canvas-container');
+      resizeCanvas(container.offsetWidth, calculateCanvasHeight());
       redraw();
     }
   </script>
