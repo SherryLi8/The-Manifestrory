@@ -23,39 +23,35 @@
       margin: 0;
       padding: 0;
       line-height: 1.6;
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
     }
 
     .app-container {
       display: flex;
-      flex: 1;
-      overflow: hidden;
+      flex-direction: column;
+      min-height: 100vh;
     }
 
     .editor-panel {
-      width: 40%;
-      padding: 1.5rem;
-      overflow-y: auto;
-      border-right: 1px solid var(--border-color);
+      padding: 1rem;
+      border-bottom: 1px solid var(--border-color);
     }
 
     .preview-panel {
-      width: 60%;
-      padding: 1.5rem;
+      flex: 1;
       display: flex;
       flex-direction: column;
+      padding: 1rem;
     }
 
     .tabs {
       display: flex;
       margin-bottom: 1rem;
-      border-bottom: 1px solid var(--border-color);
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
     }
 
     .tab {
-      padding: 0.75rem 1.5rem;
+      padding: 0.75rem 1rem;
       cursor: pointer;
       background-color: var(--tab-inactive);
       border: 1px solid var(--border-color);
@@ -64,6 +60,7 @@
       margin-right: 0.5rem;
       font-weight: 500;
       transition: all 0.2s;
+      white-space: nowrap;
     }
 
     .tab.active {
@@ -77,7 +74,7 @@
 
     .tab-content {
       display: none;
-      padding: 1.5rem;
+      padding: 1rem;
       background-color: var(--card-bg);
       border: 1px solid var(--border-color);
       border-top: none;
@@ -90,6 +87,7 @@
 
     #canvas-container {
       flex: 1;
+      min-height: 300px;
       border-radius: 12px;
       overflow: hidden;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
@@ -106,8 +104,8 @@
     .export-buttons {
       display: flex;
       gap: 0.5rem;
-      margin-top: 1.5rem;
-      justify-content: flex-start; /* Changed to left-align */
+      margin-top: 1rem;
+      justify-content: flex-start;
     }
 
     .export-button {
@@ -119,6 +117,8 @@
       font-weight: 600;
       cursor: pointer;
       transition: background-color 0.2s;
+      width: 100%;
+      text-align: center;
     }
 
     .export-button:hover {
@@ -174,7 +174,7 @@
 
     .settings-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      grid-template-columns: 1fr 1fr;
       gap: 1rem;
     }
 
@@ -199,11 +199,41 @@
       margin-top: -0.5rem;
       margin-bottom: 1rem;
     }
+
+    h1, h2 {
+      margin: 0.5rem 0;
+    }
+
+    @media (min-width: 768px) {
+      .app-container {
+        flex-direction: row;
+        height: 100vh;
+      }
+      
+      .editor-panel {
+        width: 40%;
+        overflow-y: auto;
+        border-right: 1px solid var(--border-color);
+        border-bottom: none;
+      }
+      
+      .preview-panel {
+        width: 60%;
+      }
+      
+      .settings-grid {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      }
+      
+      .export-button {
+        width: auto;
+      }
+    }
   </style>
 </head>
 <body>
   <div class="app-container">
-    <!-- Left Editor Panel -->
+    <!-- Editor Panel (now on top) -->
     <div class="editor-panel">
       <h1>The Manifestory</h1>
       
@@ -218,18 +248,20 @@
       <div id="content-tab" class="tab-content active">
         <h2 class="card-title">Content</h2>
         <div class="button-group">
-          <button onclick="appFunctions.addManifesto('Future')">Future Manifesto</button>
-          <button onclick="appFunctions.addManifesto('Ethical')">Ethical Design</button>
-          <button onclick="appFunctions.addManifesto('Human-Centered')">Human-Centered</button>
+          <button onclick="appFunctions.addManifesto('Future')">Future</button>
+          <button onclick="appFunctions.addManifesto('Ethical')">Ethical</button>
+          <button onclick="appFunctions.addManifesto('Human-Centered')">Human</button>
           <button onclick="appFunctions.addManifesto('Experimental')">Experimental</button>
           <button onclick="appFunctions.addManifesto('Radical')">Radical</button>
           <button onclick="appFunctions.addManifesto('Playful')">Playful</button>
         </div>
         
-        <textarea id="userInput" placeholder="Type your manifesto:" rows="8"></textarea>
+        <textarea id="userInput" placeholder="Type your manifesto:" rows="5"></textarea>
         <div class="word-count"><span id="charCount">0</span>/500</div>
-        <button onclick="appFunctions.addCustom()">Add custom content</button>
-        <button onclick="appFunctions.clearAll()" style="margin-left: 0.5rem;">Clear All</button>
+        <div class="button-group">
+          <button onclick="appFunctions.addCustom()">Add custom content</button>
+          <button onclick="appFunctions.clearAll()">Clear All</button>
+        </div>
       </div>
 
       <!-- Style Tab -->
@@ -299,13 +331,13 @@
         </div>
       </div>
 
-      <!-- Export Buttons (Now left-aligned) -->
+      <!-- Export Buttons -->
       <div class="export-buttons">
         <button class="export-button" onclick="exportAsImage()">Export Image</button>
       </div>
     </div>
 
-    <!-- Right Preview Panel -->
+    <!-- Preview Panel (now on bottom) -->
     <div class="preview-panel">
       <h2>Preview</h2>
       <div id="canvas-container">
